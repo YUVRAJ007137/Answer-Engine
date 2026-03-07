@@ -394,10 +394,11 @@ export default function ChatPage() {
     }, 300);
   }, []);
 
-  const handleDownloadPdf = useCallback(async () => {
-    if (!streamResults || streamResults.length === 0) return;
+  const handleDownloadPdf = useCallback(async (resultsToExport) => {
+    const data = resultsToExport ?? streamResults;
+    if (!data || data.length === 0) return;
     try {
-      await downloadAnswersAsPdf(streamResults);
+      await downloadAnswersAsPdf([...data]);
     } catch (err) {
       setError(err.message || "Failed to create PDF.");
     }
@@ -532,7 +533,7 @@ export default function ChatPage() {
               <div className="flex items-center gap-2 flex-wrap">
                 <button
                   type="button"
-                  onClick={handleDownloadPdf}
+                  onClick={() => handleDownloadPdf(streamResults)}
                   className="text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors"
                   style={{ borderColor: "var(--primary)", color: "var(--primary)" }}
                 >

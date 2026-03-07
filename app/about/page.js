@@ -151,6 +151,21 @@ export default function AboutPage() {
                 </svg>
                 Email
               </a>
+              <a
+                href="https://www.buymeacoffee.com/yuvraj_chaudhari_007"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                style={{
+                  background: "#FFDD00",
+                  color: "#000",
+                }}
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20.216 5.415A2.647 2.647 0 0 0 18.2 4.25h-.027a2.647 2.647 0 0 0-2.016.932 2.647 2.647 0 0 0-.646 1.883v.027a2.647 2.647 0 0 0 .646 1.883 2.647 2.647 0 0 0 2.016.932h.027a2.647 2.647 0 0 0 2.016-1.415 2.647 2.647 0 0 0 0-2.083zm-4.32 0A2.647 2.647 0 0 0 13.88 4.25h-.027a2.647 2.647 0 0 0-2.016.932 2.647 2.647 0 0 0-.646 1.883v.027a2.647 2.647 0 0 0 .646 1.883 2.647 2.647 0 0 0 2.016.932h.027a2.647 2.647 0 0 0 2.016-1.415 2.647 2.647 0 0 0 0-2.083zM2.5 8.75h19a1.25 1.25 0 0 1 1.25 1.25v1.5a1.25 1.25 0 0 1-1.25 1.25h-1.5v6.5a2.75 2.75 0 0 1-2.75 2.75h-11a2.75 2.75 0 0 1-2.75-2.75v-6.5h-1.5A1.25 1.25 0 0 1 1.25 11.5v-1.5A1.25 1.25 0 0 1 2.5 8.75z" />
+                </svg>
+                Buy Me a Coffee
+              </a>
             </div>
           </div>
         </section>
