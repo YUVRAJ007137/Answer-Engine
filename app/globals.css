@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+/* System default (no data-theme): follow OS preference */
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-border: #e2e8f0;
+  --primary: #6366f1;
+  --primary-hover: #4f46e5;
+  --primary-light: #eef2ff;
+  --muted: #64748b;
+  --success: #22c55e;
+  --error: #ef4444;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0f172a;
+    --foreground: #f1f5f9;
+    --card: #1e293b;
+    --card-border: #334155;
+    --primary: #818cf8;
+    --primary-hover: #6366f1;
+    --primary-light: #1e1b4b;
+    --muted: #94a3b8;
+    --success: #4ade80;
+    --error: #f87171;
+  }
+}
+
+/* Explicit light theme */
+[data-theme="light"] {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-border: #e2e8f0;
+  --primary: #6366f1;
+  --primary-hover: #4f46e5;
+  --primary-light: #eef2ff;
+  --muted: #64748b;
+  --success: #22c55e;
+  --error: #ef4444;
+}
+
+/* Explicit dark theme */
+[data-theme="dark"] {
+  --background: #0f172a;
+  --foreground: #f1f5f9;
+  --card: #1e293b;
+  --card-border: #334155;
+  --primary: #818cf8;
+  --primary-hover: #6366f1;
+  --primary-light: #1e1b4b;
+  --muted: #94a3b8;
+  --success: #4ade80;
+  --error: #f87171;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--card-border);
+  border-radius: 3px;
+}
