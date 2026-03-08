@@ -36,7 +36,7 @@ export default function AboutPage() {
             <div className="flex items-center gap-4">
               <div className="w-20 h-20 rounded-full overflow-hidden relative shrink-0">
                 <Image
-                  src="https://drive.google.com/file/d/1e38V8_KvMFRMg-UGwG2GLbNR383uPGmg/view?usp=drivesdk"
+                  src="/images/developer.png"
                   alt="Yuvraj"
                   fill
                   className="object-cover"
