@@ -6,6 +6,7 @@ import AnswerContent from "./AnswerContent";
 export default function AnswerCard({ index, question, answer, error, isPending, onRegenerate, onRetry, isRegenerating }) {
   const [copied, setCopied] = useState(false);
   const canRegenerate = (answer || error) && !isPending && !isRegenerating;
+  const hasQuestionNoAnswer = question && !answer && !error && !isPending && !isRegenerating;
 
   const handleCopy = async () => {
     if (!answer) return;
@@ -54,6 +55,15 @@ export default function AnswerCard({ index, question, answer, error, isPending, 
               style={{ borderColor: "var(--primary)", color: "var(--primary)" }}
             >
               Regenerate
+            </button>
+          )}
+          {hasQuestionNoAnswer && onRegenerate && (
+            <button
+              onClick={() => onRegenerate(index)}
+              className="text-xs px-2.5 py-1 rounded-md font-medium transition-colors"
+              style={{ background: "var(--primary)", color: "#fff" }}
+            >
+              Generate answer
             </button>
           )}
           {error && onRetry && (
@@ -110,6 +120,13 @@ export default function AnswerCard({ index, question, answer, error, isPending, 
           >
             <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
             <span>Writing answer…</span>
+          </div>
+        ) : hasQuestionNoAnswer ? (
+          <div
+            className="text-sm rounded-lg px-4 py-4 flex items-center justify-center"
+            style={{ background: "var(--background)", color: "var(--muted)" }}
+          >
+            <span>No answer yet. Use &quot;Generate answer&quot; above to get an answer.</span>
           </div>
         ) : null}
       </div>

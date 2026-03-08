@@ -101,8 +101,6 @@ export default function ChatPage() {
 
   const handleGenerate = useCallback(async () => {
     setError(null);
-    setStreamResults(null);
-    setStreamTotal(0);
     setCurrentIndex(-1);
     setLoading(true);
     setLoadingMessage("");
@@ -174,19 +172,28 @@ export default function ChatPage() {
       setAnswerOptions({ length, style });
       setError(null);
       setReviewQuestions(null);
-      setStreamResults(null);
-      setStreamTotal(0);
+      const existingResults = streamResults && streamResults.length > 0 ? streamResults : null;
+      const appendMode = !!existingResults;
+      if (!appendMode) {
+        setStreamResults(null);
+        setStreamTotal(0);
+      }
       setCurrentIndex(-1);
       setLoading(true);
       setLoadingMessage("");
-      resultsRef.current = null;
+      resultsRef.current = appendMode ? existingResults : null;
       pendingNewIdRef.current = id === "new" ? createChatId() : null;
 
       try {
         const response = await fetch("/api/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ questions: questionsToUse, length, style }),
+          body: JSON.stringify({
+            questions: questionsToUse,
+            length,
+            style,
+            ...(appendMode && { previousQA: existingResults }),
+          }),
         });
 
         if (!response.ok) {
@@ -199,35 +206,53 @@ export default function ChatPage() {
         setLoadingMessage("Starting…");
 
         await readStream(response, (event) => {
+          const offset = appendMode ? (existingResults?.length ?? 0) : 0;
           switch (event.type) {
             case "start":
-              totalRef.current = event.total;
-              setStreamTotal(event.total);
-              const initial = Array.from({ length: event.total }, () => ({
-                question: "",
-                answer: null,
-                error: null,
-              }));
-              resultsRef.current = initial;
-              setStreamResults(initial);
-              setCurrentIndex(0);
+              totalRef.current = offset + event.total;
+              setStreamTotal(offset + event.total);
+              if (appendMode && existingResults) {
+                const newSlots = Array.from({ length: event.total }, () => ({
+                  question: "",
+                  answer: null,
+                  error: null,
+                }));
+                const combined = [...existingResults, ...newSlots];
+                resultsRef.current = combined;
+                setStreamResults(combined);
+              } else {
+                const initial = Array.from({ length: event.total }, () => ({
+                  question: "",
+                  answer: null,
+                  error: null,
+                }));
+                resultsRef.current = initial;
+                setStreamResults(initial);
+              }
+              setCurrentIndex(offset);
               break;
             case "question":
               setStreamResults((prev) => {
-                if (!prev) return prev;
-                const next = [...prev];
-                next[event.index] = { ...next[event.index], question: event.question };
+                const base = prev && prev.length > 0 ? prev : resultsRef.current;
+                if (!base) return prev;
+                const next = [...base];
+                const idx = offset + event.index;
+                if (idx >= next.length) return prev;
+                next[idx] = { ...next[idx], question: event.question };
                 resultsRef.current = next;
                 return next;
               });
-              setCurrentIndex(event.index);
-              setLoadingMessage(`Answering question ${event.index + 1} of ${totalRef.current}…`);
+              setCurrentIndex(offset + event.index);
+              setLoadingMessage(`Answering question ${offset + event.index + 1} of ${totalRef.current}…`);
               break;
             case "answer":
               setStreamResults((prev) => {
-                if (!prev) return prev;
-                const next = [...prev];
-                next[event.index] = {
+                const base = prev && prev.length > 0 ? prev : resultsRef.current;
+                if (!base) return prev;
+                const next = [...base];
+                const idx = offset + event.index;
+                if (idx >= next.length) return prev;
+                next[idx] = {
                   question: event.question,
                   answer: event.answer,
                   error: null,
@@ -235,16 +260,19 @@ export default function ChatPage() {
                 resultsRef.current = next;
                 return next;
               });
-              if (event.index + 2 <= totalRef.current) {
-                setLoadingMessage(`Answering question ${event.index + 2} of ${totalRef.current}…`);
+              if (event.index + 2 <= event.total) {
+                setLoadingMessage(`Answering question ${offset + event.index + 2} of ${totalRef.current}…`);
               }
               break;
             case "error":
               if (event.index !== undefined) {
                 setStreamResults((prev) => {
-                  if (!prev) return prev;
-                  const next = [...prev];
-                  next[event.index] = {
+                  const base = prev && prev.length > 0 ? prev : resultsRef.current;
+                  if (!base) return prev;
+                  const next = [...base];
+                  const idx = offset + event.index;
+                  if (idx >= next.length) return prev;
+                  next[idx] = {
                     question: event.question,
                     answer: null,
                     error: event.error,
@@ -290,7 +318,7 @@ export default function ChatPage() {
         pendingNewIdRef.current = null;
       }
     },
-    [id, router]
+    [id, router, streamResults]
   );
 
   useEffect(() => {
@@ -442,9 +470,9 @@ export default function ChatPage() {
               color: "var(--foreground)",
             }}
           >
-            You have answers below. To run a new set of questions without replacing these, use{" "}
-            <strong>+ New chat</strong> in the sidebar. Or enter new input above and click Detect
-            questions to replace the answers below.
+            You have answers below. To start a completely new set of questions, use{" "}
+            <strong>+ New chat</strong>. Or enter new input above and click Detect questions to{" "}
+            <strong>add more answers at the end</strong>—previous answers are kept and context is maintained.
           </div>
         )}
 

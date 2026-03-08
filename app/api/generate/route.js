@@ -18,6 +18,7 @@ export async function POST(request) {
   let questions = [];
   let answerLength = "standard";
   let answerStyle = "simple";
+  let previousQA = [];
 
   try {
     if (contentType.includes("multipart/form-data")) {
@@ -63,6 +64,14 @@ export async function POST(request) {
         ? body.length
         : "standard";
       answerStyle = ["simple", "technical"].includes(body.style) ? body.style : "simple";
+      if (Array.isArray(body.previousQA)) {
+        previousQA = body.previousQA
+          .filter((qa) => qa && qa.question != null)
+          .map((qa) => ({
+            question: String(qa.question),
+            answer: qa.answer != null ? String(qa.answer) : "",
+          }));
+      }
     }
 
     // Normalize: trim and drop empty so we never send blank questions to the AI
@@ -87,6 +96,8 @@ export async function POST(request) {
             JSON.stringify({ type: "start", total: questions.length })
           );
 
+          const contextQA = previousQA.slice();
+
           for (let i = 0; i < questions.length; i++) {
             if (i > 0) await sleep(delayMs);
 
@@ -97,14 +108,16 @@ export async function POST(request) {
             );
 
             try {
+              const context = contextQA.length > 0 ? { previousQA: contextQA } : {};
               const answer = await generateAnswer(question, {
                 length: answerLength,
                 style: answerStyle,
-              });
+              }, context);
               streamLine(
                 controller,
                 JSON.stringify({ type: "answer", index: i, question, answer })
               );
+              contextQA.push({ question, answer });
             } catch (err) {
               streamLine(
                 controller,
