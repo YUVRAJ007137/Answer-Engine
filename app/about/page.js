@@ -48,10 +48,10 @@ export default function AboutPage() {
                   className="text-lg font-medium"
                   style={{ color: "var(--foreground)" }}
                 >
-                  Yuvraj Chaudhari
+                  Tech Desk
                 </p>
                 <p className="text-sm" style={{ color: "var(--muted)" }}>
-                  Full Stack Developer
+                  Building the future.
                 </p>
               </div>
             </div>
