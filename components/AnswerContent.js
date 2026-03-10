@@ -1,8 +1,43 @@
 "use client";
 
+import { useState } from "react";
+import "katex/dist/katex.min.css";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
 import MermaidBlock from "./MermaidBlock";
+
+function CodeBlockWithCopy({ code, lang, children }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // ignore
+    }
+  };
+  return (
+    <div className="relative group my-2 rounded-lg overflow-hidden" style={{ background: "var(--card-border)" }}>
+      <div className="flex items-center justify-between px-3 py-1.5 border-b text-xs" style={{ borderColor: "var(--card-border)", background: "var(--card-bg)", color: "var(--muted)" }}>
+        {lang && <span>{lang}</span>}
+        <button
+          type="button"
+          onClick={handleCopy}
+          className="ml-auto px-2 py-1 rounded hover:opacity-90 transition-opacity"
+          style={{ background: "var(--primary)", color: "var(--primary-inverse)" }}
+        >
+          {copied ? "Copied!" : "Copy"}
+        </button>
+      </div>
+      <pre className="p-3 overflow-x-auto text-sm m-0">
+        <code style={{ color: "var(--foreground)" }}>{children}</code>
+      </pre>
+    </div>
+  );
+}
 
 const components = {
   code({ node, inline, className, children, ...props }) {
@@ -11,9 +46,16 @@ const components = {
     if (!inline && match && match[1] === "mermaid") {
       return <MermaidBlock code={code} />;
     }
+    if (!inline) {
+      return (
+        <CodeBlockWithCopy code={code} lang={match ? match[1] : null}>
+          {children}
+        </CodeBlockWithCopy>
+      );
+    }
     return (
       <code
-        className={inline ? "px-1.5 py-0.5 rounded text-sm" : "block p-3 rounded-lg my-2 overflow-x-auto text-sm"}
+        className="px-1.5 py-0.5 rounded text-sm"
         style={{
           background: "var(--card-border)",
           color: "var(--foreground)",
@@ -97,7 +139,7 @@ const components = {
 export default function AnswerContent({ content }) {
   return (
     <div className="prose prose-sm max-w-none" style={{ color: "var(--foreground)" }}>
-      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+      <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]} components={components}>
         {content}
       </ReactMarkdown>
     </div>
